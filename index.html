@@ -11,11 +11,13 @@
     <h1>🍿 Popcorn Picker</h1>
     <div class="main">
       <div class="list-section">
-        <h2>Name List</h2>
-        <ul id="nameList"></ul>
-        <div class="input-group">
-          <input type="text" id="nameInput" placeholder="Add name..." />
-          <button onclick="addName()">➕</button>
+        <button onclick="toggleList()" class="toggle-btn">📋 Show/Hide Name List</button>
+        <div id="nameListWrapper" class="hidden">
+          <ul id="nameList"></ul>
+          <div class="input-group">
+            <input type="text" id="nameInput" placeholder="Add name..." />
+            <button onclick="addName()">➕</button>
+          </div>
         </div>
       </div>
       <div class="picker-section">
@@ -27,6 +29,10 @@
       </div>
     </div>
   </div>
+
+  <!-- Popcorn rain animation -->
+  <div id="popcornRain" class="popcorn-rain hidden"></div>
+
   <script src="script.js"></script>
 </body>
 </html>
