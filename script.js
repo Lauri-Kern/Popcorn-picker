@@ -67,7 +67,30 @@ function pickName() {
 function resetRound() {
   picked = [];
   currentNameEl.textContent = "";
-  alert("Round reset! All names are back in the pool.");
+
+  // Show popcorn rain
+  const rain = document.getElementById("popcornRain");
+  rain.classList.remove("hidden");
+  rain.innerHTML = "";
+
+  for (let i = 0; i < 100; i++) {
+    const pop = document.createElement("div");
+    pop.className = "popcorn-emoji";
+    pop.textContent = "🍿";
+    pop.style.margin = "5px";
+    rain.appendChild(pop);
+  }
+
+  // Clear on click
+  rain.onclick = () => {
+    rain.classList.add("hidden");
+    rain.innerHTML = "";
+  };
+}
+
+function toggleList() {
+  const wrapper = document.getElementById("nameListWrapper");
+  wrapper.classList.toggle("hidden");
 }
 
 renderList();
