@@ -1,96 +1,104 @@
-let names = JSON.parse(localStorage.getItem("names")) || [];
-let picked = [];
+/* ---------- State ---------- */
+let names  = JSON.parse(localStorage.getItem("names") || "[]"); // [{name,hidden}]
+let picked = []; // names already chosen this round
 
-const nameListEl = document.getElementById("nameList");
-const nameInput = document.getElementById("nameInput");
-const currentNameEl = document.getElementById("currentName");
+/* ---------- DOM ---------- */
+const nameListEl   = document.getElementById("nameList");
+const nameInput    = document.getElementById("nameInput");
+const currentNameE = document.getElementById("currentName");
+const popcornRain  = document.getElementById("popcornRain");
 
-function saveNames() {
-  localStorage.setItem("names", JSON.stringify(names));
-}
+/* ---------- Helpers ---------- */
+const saveNames = () => localStorage.setItem("names", JSON.stringify(names));
 
-function addName() {
-  const name = nameInput.value.trim();
-  if (name) {
-    names.push({ name, hidden: false });
-    nameInput.value = "";
-    saveNames();
-    renderList();
-  }
-}
-
-function toggleHide(index) {
-  names[index].hidden = !names[index].hidden;
-  saveNames();
-  renderList();
-}
-
-function renderList() {
+/* ---------- List Rendering ---------- */
+function renderList(){
   nameListEl.innerHTML = "";
   names.forEach((entry, i) => {
-    const li = document.createElement("li");
-    li.className = entry.hidden ? "hidden" : "";
+    const li   = document.createElement("li");
+    if (entry.hidden) li.classList.add("hidden");
 
-    const span = document.createElement("span");
-    span.textContent = entry.name;
+    const label = document.createElement("span");
+    label.textContent = entry.name;
 
-    const toggleBtn = document.createElement("button");
-    toggleBtn.textContent = entry.hidden ? "👁️" : "🙈";
-    toggleBtn.onclick = () => toggleHide(i);
+    /* buttons: hide/show + delete */
+    const btnWrap = document.createElement("div");
+    btnWrap.className = "name-btns";
 
-    li.appendChild(span);
-    li.appendChild(toggleBtn);
+    const hideBtn = document.createElement("button");
+    hideBtn.textContent = entry.hidden ? "👁️" : "🙈";
+    hideBtn.title = entry.hidden ? "Un-hide" : "Hide";
+    hideBtn.onclick = () => { entry.hidden = !entry.hidden; saveNames(); renderList(); };
+
+    const delBtn  = document.createElement("button");
+    delBtn.textContent = "🗑️";
+    delBtn.title = "Delete";
+    delBtn.onclick = () => { 
+      names.splice(i,1);           // remove from list
+      picked = picked.filter(n=>n!==entry.name); // also remove from picked pool
+      saveNames(); 
+      renderList(); 
+    };
+
+    btnWrap.append(hideBtn, delBtn);
+    li.append(label, btnWrap);
     nameListEl.appendChild(li);
   });
 }
 
-function pickName() {
-  const pool = names.filter(n => !n.hidden && !picked.includes(n.name));
-  if (pool.length === 0) {
-    alert("All names have been picked! Reset to start over.");
+/* ---------- Add Name ---------- */
+function addName(){
+  const val = nameInput.value.trim();
+  if(!val) return;
+  names.push({name:val,hidden:false});
+  nameInput.value="";
+  saveNames();
+  renderList();
+}
+
+/* ---------- Picker ---------- */
+function pickName(){
+  const pool = names.filter(n=>!n.hidden && !picked.includes(n.name));
+  if (pool.length === 0){
+    alert("All visible names picked! Hit Reset to start over.");
     return;
   }
 
-  let i = 0;
-  const maxJumps = Math.floor(Math.random() * 10) + 10;
-  const interval = setInterval(() => {
-    const nextName = pool[Math.floor(Math.random() * pool.length)].name;
-    currentNameEl.textContent = nextName;
-    i++;
-    if (i > maxJumps) {
+  let jumps = 0, maxJumps = Math.floor(Math.random()*10)+10;
+  const interval = setInterval(()=>{
+    const next = pool[Math.floor(Math.random()*pool.length)].name;
+    currentNameE.textContent = next;
+    if (++jumps>maxJumps){
       clearInterval(interval);
-      picked.push(currentNameEl.textContent);
+      picked.push(next);
     }
   }, 100);
 }
 
-function resetRound() {
+/* ---------- Reset + Popcorn Rain ---------- */
+function resetRound(){
   picked = [];
-  currentNameEl.textContent = "";
+  currentNameE.textContent = "";
 
-  // Show popcorn rain
-  const rain = document.getElementById("popcornRain");
-  rain.classList.remove("hidden");
-  rain.innerHTML = "";
+  popcornRain.innerHTML = "";        // fresh slate
+  popcornRain.classList.remove("hidden");
 
-  for (let i = 0; i < 100; i++) {
+  for (let i=0;i<150;i++){
     const pop = document.createElement("div");
     pop.className = "popcorn-emoji";
     pop.textContent = "🍿";
-    pop.style.margin = "5px";
-    rain.appendChild(pop);
+    pop.style.animationDelay = `${Math.random()*1.5}s`;
+    popcornRain.appendChild(pop);
   }
 
-  // Clear on click
-  rain.onclick = () => {
-    rain.classList.add("hidden");
-    rain.innerHTML = "";
+  // clear overlay on first click
+  const clear = () =>{
+    popcornRain.classList.add("hidden");
+    popcornRain.innerHTML = "";
+    popcornRain.removeEventListener("click", clear);
   };
+  popcornRain.addEventListener("click", clear);
 }
 
-function toggleList() {
-  const wrapper = document.getElementById("nameListWrapper");
-  wrapper.classList.toggle("hidden");
-}
-
+/* ---------- Init ---------- */
 renderList();
