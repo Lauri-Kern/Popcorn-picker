@@ -2,41 +2,37 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>🍿 Popcorn Picker</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
-  <div class="container">
+  <header class="site-header">
     <h1>🍿 Popcorn Picker</h1>
+  </header>
 
-    <div class="main">
-      <!-- Collapsible name list -->
-      <details id="listDetails" class="list-section">
-        <summary class="summary-btn">📋 Name List (click to open / close)</summary>
-
-        <ul id="nameList"></ul>
-
-        <div class="input-group">
-          <input type="text" id="nameInput" placeholder="Add name..." />
-          <button onclick="addName()">➕</button>
-        </div>
-      </details>
-
-      <!-- Picker section -->
-      <div class="picker-section">
-        <h2>Who's next?</h2>
-        <div id="popcorn" class="popcorn">🎈</div>
-        <div id="currentName" class="picked-name">🎯</div>
-
-        <button onclick="pickName()"  class="pop-btn">Pop!</button>
-        <button onclick="resetRound()" class="reset-btn">🔄 Reset</button>
+  <main class="layout">
+    <!-- Primary focus: picker hero -->
+    <section class="picker-hero">
+      <img src="assets/popcorn.png" alt="" class="popcorn-hero" aria-hidden="true"/>
+      <div id="currentName" class="picked-name" aria-live="polite" aria-atomic="true">Ready?</div>
+      <div class="hero-actions">
+        <button type="button" onclick="pickName()" class="cta-pop">Pop!</button>
       </div>
-    </div>
-  </div>
+    </section>
 
-  <!-- Popcorn rain overlay -->
-  <div id="popcornRain" class="popcorn-rain hidden"></div>
+    <!-- Secondary: team list (smaller, centered, below) -->
+    <section class="names-panel">
+      <details id="listDetails" class="list-section">
+        <summary class="summary-btn">Team List ▼</summary>
+        <ul id="nameList"></ul>
+        <!-- JS appends a final input row here -->
+      </details>
+    </section>
+  </main>
+
+  <!-- Popcorn pile overlay (auto-clears on final pick) -->
+  <div id="popcornOverlay" class="popcorn-overlay u-hidden" aria-hidden="true"></div>
 
   <script src="script.js"></script>
 </body>
