@@ -31,9 +31,13 @@
     </section>
   </main>
 
-  <!-- Popcorn pile overlay (auto-clears on final pick) -->
-  <div id="popcornOverlay" class="popcorn-overlay u-hidden" aria-hidden="true"></div>
+  <!-- Physics overlay: Matter.js renders a canvas in here -->
+  <div id="popcornOverlay" class="physics-overlay u-hidden" aria-hidden="true">
+    <div id="overlayMsg" class="overlay-msg u-hidden">Everyone popped! 🎉</div>
+  </div>
 
+  <!-- Physics engine (client-side only) -->
+  <script src="https://cdn.jsdelivr.net/npm/matter-js@0.19.0/build/matter.min.js"></script>
   <script src="script.js"></script>
 </body>
 </html>

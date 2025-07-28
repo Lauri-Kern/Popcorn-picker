@@ -83,7 +83,7 @@ body{
   50%{ box-shadow: 0 14px 32px rgba(255,180,0,.56); }
 }
 
-/* ---------- Names Panel (secondary, smaller) ---------- */
+/* ---------- Names Panel (secondary, smaller and subtle) ---------- */
 .names-panel{
   width: 100%;
   max-width: 520px;      /* smaller container */
@@ -92,14 +92,30 @@ body{
   box-shadow: 0 6px 18px rgba(0,0,0,.06);
   padding: clamp(12px, 2.2vw, 18px);
 }
+
+/* Less prominent team list toggle */
 .summary-btn{
-  display:inline-block;
-  background:#ffdaaa;
-  padding:10px 14px;
+  display:inline-flex;
+  align-items:center;
+  gap:.5rem;
+  color:#6b5d3f;                 /* muted text */
+  background: transparent;        /* no fill */
+  border: 1.5px solid #eadfbf;    /* soft, low-contrast border */
   border-radius:10px;
+  padding:10px 12px;
+  font-weight:600;
   cursor:pointer;
   user-select:none;
 }
+.summary-btn:hover{
+  background:#fff5dc;             /* very light hover */
+  border-color:#e5d6ad;
+}
+.summary-btn:focus-visible{
+  outline:2px solid #e5d6ad;      /* accessible focus ring */
+  outline-offset:2px;
+}
+
 ul{ list-style:none; padding:0; margin:12px 0 0; }
 
 /* rows */
@@ -124,6 +140,13 @@ li.input-row{
   box-shadow: inset 0 0 0 2px #f5e0a9;
 }
 
+/* inline editing visuals */
+.name-label{ cursor:text; }
+.edit-input{
+  width:100%; padding:12px 14px; border:none; border-radius:10px; font-size:1rem; outline:none;
+  background:#fff; box-shadow: inset 0 0 0 2px #f5e0a9;
+}
+
 /* icon buttons */
 .icon-btn{
   width:36px; height:36px; border:none; background:transparent; padding:0;
@@ -132,17 +155,35 @@ li.input-row{
 .icon-btn:hover{ background:#ffe5a4; }
 .icon-btn svg{ width:22px; height:22px; display:block; }
 
-/* ---------- Popcorn pile overlay (auto on final pick) ---------- */
-.popcorn-overlay{
+/* ---------- Physics overlay (Matter.js) ---------- */
+.physics-overlay{
   position:fixed; inset:0;
   background-color:rgba(255,248,231,.96);
-  overflow:hidden; z-index:9999; cursor:pointer;
+  overflow:hidden; z-index:9999;
 }
-.popcorn-piece{
+.physics-overlay canvas{
+  position:absolute; inset:0; width:100%; height:100%;
+}
+
+/* overlay message */
+.overlay-msg{
   position:absolute;
-  width:40px; height:40px;
-  will-change:transform;
-  transition: transform 1.1s cubic-bezier(.2,.8,.2,1);
+  top:clamp(16px, 6vh, 60px);
+  left:50%; transform:translateX(-50%);
+  padding: 10px 16px;
+  border-radius: 999px;
+  background: #ffffffcc;
+  color:#1d1300;
+  font-weight:900;
+  font-size: clamp(1.1rem, 2.5vw, 2rem);
+  letter-spacing:.5px;
+  box-shadow: 0 6px 16px rgba(0,0,0,.08);
+  backdrop-filter: blur(4px);
+  animation: msgPop .5s ease;
+}
+@keyframes msgPop{
+  0%{transform:translateX(-50%) scale(.9); opacity:0}
+  100%{transform:translateX(-50%) scale(1); opacity:1}
 }
 
 /* Utility */
