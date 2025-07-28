@@ -3,7 +3,22 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>🍿 Popcorn Picker</title>
+
+  <title> 🍿 Popcorn Picker 🍿</title>
+
+  <!-- Security: Content Security Policy (allows Matter.js while staying tight elsewhere) -->
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src 'self' https://cdn.jsdelivr.net 'unsafe-eval';
+    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+    font-src 'self' https://fonts.gstatic.com;
+    img-src 'self' data:;
+    object-src 'none';
+    base-uri 'self';
+    form-action 'self';
+  ">
+
+
   <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
@@ -17,27 +32,33 @@
       <img src="assets/popcorn.png" alt="" class="popcorn-hero" aria-hidden="true"/>
       <div id="currentName" class="picked-name" aria-live="polite" aria-atomic="true">Ready?</div>
       <div class="hero-actions">
-        <button type="button" onclick="pickName()" class="cta-pop">Pop!</button>
+        <button type="button" id="popBtn" class="cta-pop">Pop!</button>
       </div>
     </section>
 
-    <!-- Secondary: team list (smaller, centered, below) -->
+    <!-- Secondary: Team list (button-size when closed; expands when open) -->
     <section class="names-panel">
       <details id="listDetails" class="list-section">
-        <summary class="summary-btn">Team List ▼</summary>
-        <ul id="nameList"></ul>
-        <!-- JS appends a final input row here -->
+        <summary class="summary-btn">Team List</summary>
+
+        <div class="list-card">
+          <ul id="nameList"></ul>
+          <!-- JS appends the final input row inside #nameList -->
+        </div>
       </details>
     </section>
   </main>
 
-  <!-- Physics overlay: Matter.js renders a canvas in here -->
+  <!-- Finale overlay -->
   <div id="popcornOverlay" class="physics-overlay u-hidden" aria-hidden="true">
-    <div id="overlayMsg" class="overlay-msg u-hidden">Everyone popped! 🎉</div>
+    <div id="overlayMsg" class="overlay-msg u-hidden">Everyone popped! 🎉 Click to reset</div>
   </div>
 
-  <!-- Physics engine (client-side only) -->
+  <!-- Matter.js (CDN). If you later host locally, put it at assets/matter.min.js and:
+       1) change script-src CSP to 'self' 'unsafe-eval';
+       2) swap this <script> tag to the local file. -->
   <script src="https://cdn.jsdelivr.net/npm/matter-js@0.19.0/build/matter.min.js"></script>
+
   <script src="script.js"></script>
 </body>
 </html>

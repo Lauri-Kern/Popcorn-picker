@@ -83,24 +83,33 @@ body{
   50%{ box-shadow: 0 14px 32px rgba(255,180,0,.56); }
 }
 
-/* ---------- Names Panel (secondary, smaller and subtle) ---------- */
+/* ---------- Names Panel (button-size closed; centered at all times) ---------- */
 .names-panel{
   width: 100%;
-  max-width: 520px;      /* smaller container */
-  background:#fff;
-  border-radius: var(--radius);
-  box-shadow: 0 6px 18px rgba(0,0,0,.06);
-  padding: clamp(12px, 2.2vw, 18px);
+  display:flex;
+  justify-content:center;  /* keep the control centered in the page */
 }
 
-/* Less prominent team list toggle */
+/* Keep <details> centered and small when closed; expand but remain centered when open */
+.names-panel .list-section{
+  display:block;
+  width: max-content;        /* shrink-wrap to the summary button */
+  margin-inline: auto;       /* center horizontally */
+  transition: width .24s ease;
+}
+.names-panel .list-section[open]{
+  width: clamp(320px, 60vw, 520px);  /* expand to card width, still centered */
+}
+
+/* Subtle list toggle button (stays centered inside both widths) */
 .summary-btn{
   display:inline-flex;
   align-items:center;
+  justify-content:center;     /* keep text centered in button */
   gap:.5rem;
-  color:#6b5d3f;                 /* muted text */
-  background: transparent;        /* no fill */
-  border: 1.5px solid #eadfbf;    /* soft, low-contrast border */
+  color:#6b5d3f;              /* muted text */
+  background: transparent;    /* no fill */
+  border: 1.5px solid #eadfbf;
   border-radius:10px;
   padding:10px 12px;
   font-weight:600;
@@ -108,17 +117,53 @@ body{
   user-select:none;
 }
 .summary-btn:hover{
-  background:#fff5dc;             /* very light hover */
+  background:#fff5dc;         /* very light hover */
   border-color:#e5d6ad;
 }
 .summary-btn:focus-visible{
-  outline:2px solid #e5d6ad;      /* accessible focus ring */
+  outline:2px solid #e5d6ad;  /* accessible focus ring */
   outline-offset:2px;
 }
+/* ▼ / ▲ caret on the Team list button */
+.summary-btn::after{
+  content: "▼";
+  margin-left: .5rem;
+  font-size: .95em;
+  line-height: 1;
+  opacity: .8;
+  transition: transform .2s ease;
+}
+/* When the dropdown is open, show ▲ */
+.list-section[open] .summary-btn::after{
+  content: "▲";
+}
 
-ul{ list-style:none; padding:0; margin:12px 0 0; }
+/* When open, make the summary span the card width and keep content centered */
+.list-section[open] .summary-btn{
+  width: 100%;
+  justify-content: center;
+}
 
-/* rows */
+/* The expanding card appears only when <details open> */
+.list-card{
+  display:none;
+  margin-top:10px;
+  width: 100%;                              /* fill the expanded details width */
+  background:#fff;
+  border-radius: var(--radius);
+  box-shadow: 0 6px 18px rgba(0,0,0,.06);
+  padding: clamp(12px, 2.2vw, 18px);
+  opacity:0; transform: scale(.98);
+  transition: opacity .2s ease, transform .2s ease;
+}
+.list-section[open] .list-card{
+  display:block;
+  opacity:1; transform: scale(1);
+}
+
+/* ---------- List rows ---------- */
+ul{ list-style:none; padding:0; margin:0; }
+
 li.item{
   display:grid;
   grid-template-columns: 36px 1fr 36px; /* eye | name | trash */

@@ -1,16 +1,27 @@
 /* ---------- Config ---------- */
 const POPCORN_SRC = "assets/popcorn.png"; // your PNG
 const ICON_STROKE = "#7a5a2a";            // inline icon color
+const MAX_NAMES   = 200;                  // soft cap to keep UI snappy
 
 /* ---------- State ---------- */
 let names = JSON.parse(localStorage.getItem("names") || "[]"); // [{name, absent}]
 let picked = [];
 let isAnimating = false;
-let finaleRunning = false;      // prevents double physics finales
-let editingIndex = null;        // which row is being edited
-let editingOriginal = "";       // original text of that row
+let finaleRunning = false; // prevents double finales
+let editingIndex = null;
+let editingOriginal = "";
 
-/* Migrate old formats if needed */
+/* ---------- Sanitization ---------- */
+function sanitizeName(s){
+  const clean = String(s)
+    .replace(/[\u0000-\u001F\u007F]/g, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 60);
+  return clean;
+}
+
+/* ---------- Migrate old formats if needed ---------- */
 let migrated = false;
 names = names.map(n => {
   if (typeof n === "string") { migrated = true; return { name: n, absent: false }; }
@@ -24,6 +35,7 @@ const listEl       = document.getElementById("nameList");
 const currentNameE = document.getElementById("currentName");
 const overlay      = document.getElementById("popcornOverlay");
 const overlayMsg   = document.getElementById("overlayMsg");
+const popBtn       = document.getElementById("popBtn");
 
 /* ---------- Storage ---------- */
 const saveNames = () => localStorage.setItem("names", JSON.stringify(names));
@@ -35,6 +47,11 @@ const roundComplete = () => {
   if (vis.length === 0) return false;
   return vis.every(n => picked.includes(n));
 };
+const hasDuplicate = (value, exceptIndex = -1) => {
+  const v = value.toLowerCase();
+  return names.some((n, i) => i !== exceptIndex && n.name.toLowerCase() === v);
+};
+const physicsAvailable = () => typeof window.Matter !== "undefined" && !!Matter.Engine;
 
 /* ---------- Inline SVG Icons ---------- */
 const NS = "http://www.w3.org/2000/svg";
@@ -61,32 +78,24 @@ function beginEdit(i){
   editingIndex = i;
   editingOriginal = names[i].name;
   renderList();
-  // Focus and select text
   setTimeout(() => {
     const el = document.getElementById(`editInput-${i}`);
     if (el) { el.focus(); el.setSelectionRange(0, el.value.length); }
   }, 0);
 }
-
 function commitEdit(i, value){
-  const newVal = (value || "").trim();
+  const newVal = sanitizeName(value ?? "");
   const oldVal = names[i].name;
-  if (!newVal) {
-    // empty -> revert
-    editingIndex = null; editingOriginal = "";
-    renderList();
-    return;
-  }
+  if (!newVal) { cancelEdit(); return; }
+  if (hasDuplicate(newVal, i)) { cancelEdit(); return; }
   if (newVal !== oldVal) {
     names[i].name = newVal;
-    // update any picked occurrences so no-repeat logic still works
     picked = picked.map(n => n === oldVal ? newVal : n);
     saveNames();
   }
   editingIndex = null; editingOriginal = "";
   renderList();
 }
-
 function cancelEdit(){
   editingIndex = null; editingOriginal = "";
   renderList();
@@ -94,27 +103,23 @@ function cancelEdit(){
 
 /* ---------- Rendering ---------- */
 function renderList() {
-  listEl.innerHTML = "";
-
-  // existing names
+  listEl.textContent = "";
   names.forEach((entry, i) => {
     const li = document.createElement("li");
     li.className = "item";
     if (entry.absent) li.classList.add("absent");
 
-    // left: eye toggle
     const eyeBtn = document.createElement("button");
     eyeBtn.className = "icon-btn";
     eyeBtn.title = entry.absent ? "Show for this meeting" : "Hide for this meeting";
     eyeBtn.setAttribute("aria-label", eyeBtn.title);
     eyeBtn.appendChild(iconEye(!entry.absent));
-    eyeBtn.onclick = (e) => {
+    eyeBtn.addEventListener("click", (e) => {
       e.stopPropagation();
       entry.absent = !entry.absent;
       saveNames(); renderList();
-    };
+    });
 
-    // middle: name (label OR edit input)
     let middle;
     if (editingIndex === i) {
       middle = document.createElement("input");
@@ -132,28 +137,27 @@ function renderList() {
       middle.className = "name-label";
       middle.title = "Click to edit";
       middle.textContent = entry.name;
-      middle.onclick = () => beginEdit(i);
+      middle.addEventListener("click", () => beginEdit(i));
     }
 
-    // right: trash
     const trashBtn = document.createElement("button");
     trashBtn.className = "icon-btn";
     trashBtn.title = "Delete";
     trashBtn.setAttribute("aria-label", "Delete");
     trashBtn.appendChild(iconTrash());
-    trashBtn.onclick = (e) => {
+    trashBtn.addEventListener("click", (e) => {
       e.stopPropagation();
       const removed = entry.name;
       names.splice(i, 1);
       picked = picked.filter(n => n !== removed);
       saveNames(); renderList();
-    };
+    });
 
     li.append(eyeBtn, middle, trashBtn);
     listEl.appendChild(li);
   });
 
-  // input row at the end
+  // input row
   const inputLi = document.createElement("li");
   inputLi.className = "input-row";
   const input = document.createElement("input");
@@ -163,29 +167,30 @@ function renderList() {
   input.autocomplete = "off";
   input.addEventListener("keydown", (e) => {
     if (e.key === "Enter") {
-      const val = input.value.trim();
-      if (!val) return;
-      addName(val);
+      const v = sanitizeName(input.value);
+      if (!v || names.length >= MAX_NAMES || hasDuplicate(v)) return;
+      addName(v);
     }
   });
   inputLi.appendChild(input);
   listEl.appendChild(inputLi);
 
-  // focus the new row for fast entry (only if not in edit mode)
   if (editingIndex === null) {
     setTimeout(() => document.getElementById("newNameInput")?.focus(), 0);
   }
 }
 
 function addName(val) {
-  names.push({ name: val, absent: false });
+  const v = sanitizeName(val);
+  if (!v || names.length >= MAX_NAMES || hasDuplicate(v)) return;
+  names.push({ name: v, absent: false });
   saveNames();
-  renderList(); // re-render and focus a fresh input row automatically
+  renderList();
 }
 
 /* ---------- Picker ---------- */
 function pickName(){
-  if (isAnimating || finaleRunning) return; // avoid spam / duplicate finales
+  if (isAnimating || finaleRunning) return;
   const pool = names.filter(n => !n.absent && !picked.includes(n.name));
   const vis = visibleNames();
 
@@ -193,10 +198,8 @@ function pickName(){
     currentNameE.textContent = "Add names below";
     return;
   }
-
-  // If pool is empty (all visible already picked), trigger finale once
   if (pool.length === 0) {
-    physicsFinaleThenResetOnClick();
+    finaleThenResetOnClick();
     return;
   }
 
@@ -207,15 +210,18 @@ function pickName(){
     if (++jumps > maxJumps){
       clearInterval(interval);
       picked.push(next);
-      if (roundComplete()) physicsFinaleThenResetOnClick();
+      if (roundComplete()) finaleThenResetOnClick();
     }
   }, 100);
 }
 
-/* ---------- Physics finale (gravity + collisions) ---------- */
-let physicsCleanup = null; // function to clean engine/renderer
+/* ---------- Finale: Physics first; fallback to DOM if blocked ---------- */
+let physicsCleanup = null;
 
-// Preload image to compute sprite scale accurately
+// Physics params
+const SPRITE_PX = 56;
+const PIECE_RADIUS = SPRITE_PX/2;
+const DENSITY_FACTOR = 4500;
 let spriteScale = null;
 (function preloadPopcorn(){
   const img = new Image();
@@ -223,13 +229,10 @@ let spriteScale = null;
   img.onload = () => { spriteScale = SPRITE_PX / img.naturalWidth; };
 })();
 
-// Larger sprites & higher fill
-const SPRITE_PX = 56;            // visual width of each popcorn sprite (~56px)
-const PIECE_RADIUS = SPRITE_PX/2; // physics circle radius
-const DENSITY_FACTOR = 4500;     // smaller = more pieces; was 7000
+function runPhysicsFinale(afterClose){
+  if (!physicsAvailable()) return false;
 
-function launchPhysicsFinale({ afterClose } = {}){
-  if (finaleRunning) return; // guard
+  if (finaleRunning) return true;
   finaleRunning = true;
   isAnimating = true;
 
@@ -237,18 +240,15 @@ function launchPhysicsFinale({ afterClose } = {}){
   const width  = window.innerWidth;
   const height = window.innerHeight;
 
-  // Ensure overlay is clean (remove old canvas if any)
-  const oldCanvas = overlay.querySelector("canvas");
-  if (oldCanvas) oldCanvas.remove();
+  // Clean any previous canvas
+  overlay.querySelector("canvas")?.remove();
 
-  // Show overlay & message
   overlay.classList.remove("u-hidden");
   overlayMsg.classList.remove("u-hidden");
   overlayMsg.textContent = "Everyone popped! 🎉 Click to reset";
 
-  // Create engine & renderer
   const engine = Engine.create();
-  engine.gravity.y = 1.0; // gravity
+  engine.gravity.y = 1.0;
 
   const render = Render.create({
     element: overlay, engine,
@@ -258,15 +258,13 @@ function launchPhysicsFinale({ afterClose } = {}){
     }
   });
 
-  // Static boundaries (floor + side walls)
   const floor  = Bodies.rectangle(width/2, height+40, width+400, 80, { isStatic:true, render:{ fillStyle:"transparent" } });
-  const leftW  = Bodies.rectangle(-40, height/2, 80, height+400,      { isStatic:true, render:{ fillStyle:"transparent" } });
-  const rightW = Bodies.rectangle(width+40, height/2, 80, height+400,  { isStatic:true, render:{ fillStyle:"transparent" } });
+  const leftW  = Bodies.rectangle(-40, height/2, 80, height+400,     { isStatic:true, render:{ fillStyle:"transparent" } });
+  const rightW = Bodies.rectangle(width+40, height/2, 80, height+400, { isStatic:true, render:{ fillStyle:"transparent" } });
   Composite.add(engine.world, [floor, leftW, rightW]);
 
-  // Spawn popcorn pieces (sprites) with collisions
   const baseTotal = Math.floor((width * height) / DENSITY_FACTOR);
-  const total = Math.max(180, baseTotal); // ensure a good fill on small screens
+  const total = Math.max(180, baseTotal);
   for (let i = 0; i < total; i++) {
     const x = Math.random() * width;
     const y = -100 - Math.random() * 500;
@@ -278,32 +276,26 @@ function launchPhysicsFinale({ afterClose } = {}){
       render: {
         sprite: {
           texture: POPCORN_SRC,
-          xScale: (spriteScale ?? (SPRITE_PX / 256)), // fallback scale (assume 256px source)
+          xScale: (spriteScale ?? (SPRITE_PX / 256)),
           yScale: (spriteScale ?? (SPRITE_PX / 256))
         }
       }
     });
-
     Matter.Composite.add(engine.world, body);
   }
 
-  // Start engine
   const runner = Matter.Runner.create();
   Matter.Runner.run(runner, engine);
   Matter.Render.run(render);
 
-  // Cleanup function
   physicsCleanup = function cleanup() {
     try {
       Matter.Render.stop(render);
       Matter.Runner.stop(runner);
-      const canvases = overlay.getElementsByTagName("canvas");
-      if (canvases.length) overlay.removeChild(canvases[0]);
+      overlay.querySelector("canvas")?.remove();
       Matter.Composite.clear(engine.world, false);
       overlay.classList.add("u-hidden");
       overlayMsg.classList.add("u-hidden");
-    } catch(e) {
-      // no-op
     } finally {
       physicsCleanup = null;
       finaleRunning = false;
@@ -312,26 +304,80 @@ function launchPhysicsFinale({ afterClose } = {}){
     }
   };
 
-  // Click to dismiss (no auto-timeout)
+  const onClick = () => { physicsCleanup?.(); overlay.removeEventListener("click", onClick); };
+  overlay.addEventListener("click", onClick);
+
+  return true;
+}
+
+/* ---------- Simple DOM fallback (no physics, still fills screen & piles visually) ---------- */
+function runFallbackFinale(afterClose){
+  if (finaleRunning) return;
+  finaleRunning = true;
+  isAnimating = true;
+
+  overlay.classList.remove("u-hidden");
+  overlayMsg.classList.remove("u-hidden");
+  overlayMsg.textContent = "Everyone popped! 🎉 Click to reset";
+
+  // Remove any physics canvas just in case
+  overlay.querySelector("canvas")?.remove();
+
+  // Build a grid of popcorns that drop into rows (CSS transitions)
+  const size = 56, cell = 58, offset = Math.floor((cell - size) / 2);
+  const cols = Math.max(1, Math.floor(window.innerWidth  / cell));
+  const rows = Math.max(1, Math.floor(window.innerHeight / cell));
+  const total = cols * rows;
+  const stack = new Array(cols).fill(0);
+
+  // Clear existing nodes
+  [...overlay.querySelectorAll(".fallback-pop")].forEach(n => n.remove());
+
+  for (let i = 0; i < total; i++){
+    const col  = i % cols;
+    const row  = stack[col]++;
+    const x    = col * cell + offset;
+    const yEnd = window.innerHeight - (row + 1) * cell + offset;
+
+    const el = document.createElement("img");
+    el.className = "fallback-pop";
+    el.src = POPCORN_SRC;
+    el.alt = "Popcorn";
+    el.style.position = "absolute";
+    el.style.width = `${size}px`;
+    el.style.height = `${size}px`;
+    el.style.willChange = "transform";
+    el.style.transition = "transform 1.1s cubic-bezier(.2,.8,.2,1)";
+    el.style.transform = `translate(${x}px, -80px)`;
+    overlay.appendChild(el);
+
+    const delay = Math.random() * 800;
+    setTimeout(() => { el.style.transform = `translate(${x}px, ${yEnd}px)`; }, delay);
+  }
+
   const onClick = () => {
-    if (physicsCleanup) physicsCleanup();
+    // Clear fallback nodes
+    [...overlay.querySelectorAll(".fallback-pop")].forEach(n => n.remove());
+    overlay.classList.add("u-hidden");
+    overlayMsg.classList.add("u-hidden");
     overlay.removeEventListener("click", onClick);
+    finaleRunning = false;
+    isAnimating = false;
+    if (typeof afterClose === "function") afterClose();
   };
   overlay.addEventListener("click", onClick);
 }
 
-function physicsFinaleThenResetOnClick(){
-  if (finaleRunning) return;
-  launchPhysicsFinale({
-    afterClose: () => {
-      picked = [];
-      currentNameE.textContent = "Ready?";
-    }
-  });
+/* ---------- Unified finale trigger ---------- */
+function finaleThenResetOnClick(){
+  const afterClose = () => { picked = []; currentNameE.textContent = "Ready?"; };
+
+  // Try physics first; if it fails (e.g., CSP or CDN blocked), fall back
+  const started = runPhysicsFinale(afterClose);
+  if (!started) runFallbackFinale(afterClose);
 }
 
-/* ---------- Init ---------- */
+/* ---------- Init & event bindings ---------- */
 renderList();
-
-/* Expose for inline handlers in HTML */
-window.pickName = pickName;
+// Script is at the end of <body>, so DOM is ready—bind directly:
+popBtn?.addEventListener("click", pickName);
