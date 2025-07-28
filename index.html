@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>🍿 Popcorn Picker</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>🍿 Popcorn Picker</h1>
+    <div class="main">
+      <div class="list-section">
+        <h2>Name List</h2>
+        <ul id="nameList"></ul>
+        <div class="input-group">
+          <input type="text" id="nameInput" placeholder="Add name..." />
+          <button onclick="addName()">➕</button>
+        </div>
+      </div>
+      <div class="picker-section">
+        <h2>Who's next?</h2>
+        <div id="popcorn" class="popcorn">🎈</div>
+        <div id="currentName" class="picked-name">🎯</div>
+        <button onclick="pickName()" class="pop-btn">Pop!</button>
+        <button onclick="resetRound()" class="reset-btn">🔄 Reset</button>
+      </div>
+    </div>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>
