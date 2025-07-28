@@ -1,3 +1,4 @@
+/* ---------- Base page ---------- */
 body {
   font-family: "Comic Sans MS", cursive, sans-serif;
   background: #fff8e7;
@@ -5,137 +6,67 @@ body {
   padding: 20px;
   color: #333;
 }
+h1          { text-align:center; font-size:2.5em; margin:0; }
+.container  { max-width:900px; margin:auto; }
 
-h1 {
-  text-align: center;
-  font-size: 2.5em;
+/* ---------- Layout ---------- */
+.main{display:flex;gap:40px;margin-top:30px;flex-wrap:wrap;}
+.list-section,.picker-section{flex:1;min-width:300px;}
+
+/* ---------- List ---------- */
+summary      { cursor:pointer; font-size:1.2em; margin-bottom:10px; }
+ul           { list-style:none; padding:0; margin:0;}
+
+li{
+  padding:8px 10px; background:#fceabb; margin-bottom:6px;
+  display:flex; justify-content:space-between; align-items:center;
+  border-radius:8px;
+}
+li.hidden{opacity:.4;text-decoration:line-through;}
+
+.name-btns{display:flex;gap:6px;}
+.name-btns button{padding:2px 6px;font-size:1em;}
+
+.input-group{margin-top:15px;}
+input[type="text"]{
+  padding:10px;border:none;border-radius:8px;width:70%;font-size:1em;
 }
 
-.container {
-  max-width: 900px;
-  margin: auto;
+/* ---------- Buttons ---------- */
+button{
+  cursor:pointer;padding:10px;border:none;border-radius:8px;font-size:1em;
+}
+button:hover{background:#ffe5a4;}
+.pop-btn,.reset-btn{margin:5px;background:#ffce54;}
+.summary-btn{background:#ffdaaa;border-radius:8px;padding:8px 12px;display:inline-block;}
+
+/* ---------- Picker animation ---------- */
+.popcorn{
+  font-size:3em;text-align:center;margin:20px 0;
+  animation:float 2s ease-in-out infinite;
+}
+@keyframes float{
+ 0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}
+}
+.picked-name{
+  text-align:center;font-size:2em;min-height:40px;margin:15px 0;font-weight:bold;
 }
 
-.main {
-  display: flex;
-  gap: 40px;
-  margin-top: 30px;
-  flex-wrap: wrap;
+/* ---------- Popcorn rain overlay ---------- */
+.popcorn-rain{
+  position:fixed;top:0;left:0;width:100%;height:100%;
+  background-color:rgba(255,248,231,.95);
+  display:flex;flex-wrap:wrap;justify-content:center;align-content:start;
+  overflow:hidden;z-index:9999;cursor:pointer;
+}
+.popcorn-emoji{
+  font-size:2em;margin:4px;
+  animation:fall 2s ease-in forwards;
+}
+@keyframes fall{
+  0%{transform:translateY(-100px);opacity:0;}
+ 100%{transform:translateY(100vh);opacity:1;}
 }
 
-.list-section, .picker-section {
-  flex: 1;
-  min-width: 300px;
-}
-
-ul {
-  list-style: none;
-  padding: 0;
-}
-
-li {
-  padding: 8px 10px;
-  background: #fceabb;
-  margin-bottom: 6px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-radius: 8px;
-}
-
-li.hidden {
-  opacity: 0.4;
-  text-decoration: line-through;
-}
-
-input[type="text"] {
-  padding: 10px;
-  border: none;
-  border-radius: 8px;
-  width: 70%;
-  font-size: 1em;
-}
-
-.input-group {
-  margin-top: 15px;
-}
-
-button {
-  cursor: pointer;
-  padding: 10px;
-  border: none;
-  border-radius: 8px;
-  font-size: 1em;
-}
-
-button:hover {
-  background: #ffe5a4;
-}
-
-.popcorn {
-  font-size: 3em;
-  text-align: center;
-  margin: 20px 0;
-  animation: float 2s ease-in-out infinite;
-}
-
-@keyframes float {
-  0% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
-  100% { transform: translateY(0); }
-}
-
-.picked-name {
-  text-align: center;
-  font-size: 2em;
-  min-height: 40px;
-  margin: 15px 0;
-  font-weight: bold;
-}
-
-.pop-btn, .reset-btn {
-  margin: 5px;
-  background: #ffce54;
-}
-
-.toggle-btn {
-  margin-bottom: 10px;
-  background: #ffdaaa;
-}
-
-.hidden {
-  display: none;
-}
-
-/* Popcorn rain */
-.popcorn-rain {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: #fff8e7;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-content: start;
-  overflow: hidden;
-  z-index: 9999;
-  cursor: pointer;
-}
-
-.popcorn-emoji {
-  font-size: 2em;
-  animation: fall 2s ease-in forwards;
-}
-
-@keyframes fall {
-  0% {
-    transform: translateY(-100px);
-    opacity: 0;
-  }
-  100% {
-    transform: translateY(100vh);
-    opacity: 1;
-  }
-}
+/* Utility */
+.hidden{display:none;}
