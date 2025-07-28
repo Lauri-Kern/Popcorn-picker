@@ -1,0 +1,99 @@
+body {
+  font-family: "Comic Sans MS", cursive, sans-serif;
+  background: #fff8e7;
+  margin: 0;
+  padding: 20px;
+  color: #333;
+}
+
+h1 {
+  text-align: center;
+  font-size: 2.5em;
+}
+
+.container {
+  max-width: 900px;
+  margin: auto;
+}
+
+.main {
+  display: flex;
+  gap: 40px;
+  margin-top: 30px;
+  flex-wrap: wrap;
+}
+
+.list-section, .picker-section {
+  flex: 1;
+  min-width: 300px;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+li {
+  padding: 8px 10px;
+  background: #fceabb;
+  margin-bottom: 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-radius: 8px;
+}
+
+li.hidden {
+  opacity: 0.4;
+  text-decoration: line-through;
+}
+
+input[type="text"] {
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  width: 70%;
+  font-size: 1em;
+}
+
+.input-group {
+  margin-top: 15px;
+}
+
+button {
+  cursor: pointer;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1em;
+}
+
+button:hover {
+  background: #ffe5a4;
+}
+
+.popcorn {
+  font-size: 3em;
+  text-align: center;
+  margin: 20px 0;
+  animation: float 2s ease-in-out infinite;
+}
+
+@keyframes float {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0); }
+}
+
+.picked-name {
+  text-align: center;
+  font-size: 2em;
+  min-height: 40px;
+  margin: 15px 0;
+  font-weight: bold;
+}
+
+.pop-btn, .reset-btn {
+  margin: 5px;
+  background: #ffce54;
+}
