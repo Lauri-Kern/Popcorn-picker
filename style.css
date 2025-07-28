@@ -97,3 +97,45 @@ button:hover {
   margin: 5px;
   background: #ffce54;
 }
+
+.toggle-btn {
+  margin-bottom: 10px;
+  background: #ffdaaa;
+}
+
+.hidden {
+  display: none;
+}
+
+/* Popcorn rain */
+.popcorn-rain {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #fff8e7;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-content: start;
+  overflow: hidden;
+  z-index: 9999;
+  cursor: pointer;
+}
+
+.popcorn-emoji {
+  font-size: 2em;
+  animation: fall 2s ease-in forwards;
+}
+
+@keyframes fall {
+  0% {
+    transform: translateY(-100px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(100vh);
+    opacity: 1;
+  }
+}
