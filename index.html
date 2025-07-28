@@ -9,28 +9,33 @@
 <body>
   <div class="container">
     <h1>🍿 Popcorn Picker</h1>
+
     <div class="main">
-      <div class="list-section">
-        <button onclick="toggleList()" class="toggle-btn">📋 Show/Hide Name List</button>
-        <div id="nameListWrapper" class="hidden">
-          <ul id="nameList"></ul>
-          <div class="input-group">
-            <input type="text" id="nameInput" placeholder="Add name..." />
-            <button onclick="addName()">➕</button>
-          </div>
+      <!-- Collapsible name list -->
+      <details id="listDetails" class="list-section">
+        <summary class="summary-btn">📋 Name List (click to open / close)</summary>
+
+        <ul id="nameList"></ul>
+
+        <div class="input-group">
+          <input type="text" id="nameInput" placeholder="Add name..." />
+          <button onclick="addName()">➕</button>
         </div>
-      </div>
+      </details>
+
+      <!-- Picker section -->
       <div class="picker-section">
         <h2>Who's next?</h2>
         <div id="popcorn" class="popcorn">🎈</div>
         <div id="currentName" class="picked-name">🎯</div>
-        <button onclick="pickName()" class="pop-btn">Pop!</button>
+
+        <button onclick="pickName()"  class="pop-btn">Pop!</button>
         <button onclick="resetRound()" class="reset-btn">🔄 Reset</button>
       </div>
     </div>
   </div>
 
-  <!-- Popcorn rain animation -->
+  <!-- Popcorn rain overlay -->
   <div id="popcornRain" class="popcorn-rain hidden"></div>
 
   <script src="script.js"></script>
