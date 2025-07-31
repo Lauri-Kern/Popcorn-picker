@@ -1,64 +1,62 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>🍿</title>
 
-  <title> 🍿 Popcorn Picker 🍿</title>
-
-  <!-- Security: Content Security Policy (allows Matter.js while staying tight elsewhere) -->
+  <!-- same tight CSP you had (allows Matter.js) -->
   <meta http-equiv="Content-Security-Policy" content="
     default-src 'self';
     script-src 'self' https://cdn.jsdelivr.net 'unsafe-eval';
-    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-    font-src 'self' https://fonts.gstatic.com;
-    img-src 'self' data:;
+    style-src  'self' 'unsafe-inline';
+    img-src    'self' data:;
+    font-src   'self';
     object-src 'none';
-    base-uri 'self';
-    form-action 'self';
   ">
 
-
-  <link rel="stylesheet" href="style.css"/>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <header class="site-header">
-    <h1>🍿 Popcorn Picker</h1>
+    <h1>🍿 Popcorn Picker 🍿</h1>
   </header>
 
   <main class="layout">
-    <!-- Primary focus: picker hero -->
+    <!-- main picker card ------------------------------------ -->
     <section class="picker-hero">
-      <img src="assets/popcorn.png" alt="" class="popcorn-hero" aria-hidden="true"/>
+      <img src="assets/popcorn.png" alt="" class="popcorn-hero" aria-hidden="true">
+
       <div id="currentName" class="picked-name" aria-live="polite" aria-atomic="true">Ready?</div>
+
       <div class="hero-actions">
-        <button type="button" id="popBtn" class="cta-pop">Pop!</button>
+        <button id="popBtn" class="cta-pop" type="button">Pop!</button>
+      </div>
+
+      <!-- NEW progress bar (inside same card) -->
+      <div class="progress" aria-hidden="true">
+        <div id="progressBar" class="progress-bar"></div>
       </div>
     </section>
 
-    <!-- Secondary: Team list (button-size when closed; expands when open) -->
+    <!-- collapsible team list ------------------------------- -->
     <section class="names-panel">
       <details id="listDetails" class="list-section">
         <summary class="summary-btn">Team List</summary>
-
         <div class="list-card">
           <ul id="nameList"></ul>
-          <!-- JS appends the final input row inside #nameList -->
         </div>
       </details>
     </section>
   </main>
 
-  <!-- Finale overlay -->
+  <!-- finale overlay --------------------------------------- -->
   <div id="popcornOverlay" class="physics-overlay u-hidden" aria-hidden="true">
     <div id="overlayMsg" class="overlay-msg u-hidden">Everyone popped! 🎉 Click to reset</div>
   </div>
 
-  <!-- Matter.js (CDN). If you later host locally, put it at assets/matter.min.js and:
-       1) change script-src CSP to 'self' 'unsafe-eval';
-       2) swap this <script> tag to the local file. -->
+  <!-- Matter.js (unchanged) -->
   <script src="https://cdn.jsdelivr.net/npm/matter-js@0.19.0/build/matter.min.js"></script>
-
   <script src="script.js"></script>
 </body>
 </html>

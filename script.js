@@ -36,6 +36,7 @@ const currentNameE = document.getElementById("currentName");
 const overlay      = document.getElementById("popcornOverlay");
 const overlayMsg   = document.getElementById("overlayMsg");
 const popBtn       = document.getElementById("popBtn");
+const progressBar  = document.getElementById("progressBar");   // 🆕 progress bar
 
 /* ---------- Storage ---------- */
 const saveNames = () => localStorage.setItem("names", JSON.stringify(names));
@@ -52,6 +53,13 @@ const hasDuplicate = (value, exceptIndex = -1) => {
   return names.some((n, i) => i !== exceptIndex && n.name.toLowerCase() === v);
 };
 const physicsAvailable = () => typeof window.Matter !== "undefined" && !!Matter.Engine;
+
+/* ---------- progress-bar helper (🆕) ---------- */
+function updateProgress() {
+  const total = visibleNames().length;
+  const done  = picked.filter(n => visibleNames().includes(n)).length;
+  progressBar.style.width = total ? (100 * done / total) + "%" : "0%";
+}
 
 /* ---------- Inline SVG Icons ---------- */
 const NS = "http://www.w3.org/2000/svg";
@@ -178,6 +186,8 @@ function renderList() {
   if (editingIndex === null) {
     setTimeout(() => document.getElementById("newNameInput")?.focus(), 0);
   }
+
+  updateProgress();            // 🆕 refresh bar after every render
 }
 
 function addName(val) {
@@ -198,6 +208,8 @@ function pickName(){
     currentNameE.textContent = "Add names below";
     return;
   }
+
+  // pool empty => user pressed Pop! when all names already drawn
   if (pool.length === 0) {
     finaleThenResetOnClick();
     return;
@@ -210,7 +222,8 @@ function pickName(){
     if (++jumps > maxJumps){
       clearInterval(interval);
       picked.push(next);
-      if (roundComplete()) finaleThenResetOnClick();
+      updateProgress();                     // 🆕 reflect progress
+      // no auto-finale here; last name stays until user presses Pop! again
     }
   }, 100);
 }
